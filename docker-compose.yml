@@ -1,0 +1,8 @@
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
