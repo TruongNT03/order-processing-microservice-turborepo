@@ -1,0 +1,31 @@
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions } from '@nestjs/microservices';
+import { WinstonModule } from 'nest-winston';
+import { ValidationPipe } from '@nestjs/common';
+import { getLoggerTransport, buildRmqOptions, RMQ_QUEUE } from '@repo/common';
+import { AppModule } from './modules/app.module';
+
+async function bootstrap() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const logger = WinstonModule.createLogger(
+    getLoggerTransport('Order Service', isProduction),
+  );
+
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+    AppModule,
+    {
+      logger,
+      ...buildRmqOptions({ queue: RMQ_QUEUE.ORDER }),
+    },
+  );
+
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // Graceful shutdown: đóng kết nối broker/DB + dừng outbox relay gọn gàng
+  // khi nhận SIGTERM/SIGINT (OnModuleDestroy sẽ được gọi).
+  app.enableShutdownHooks();
+
+  await app.listen();
+  logger.log(`Order Service is listening on queue ${RMQ_QUEUE.ORDER}`);
+}
+bootstrap();

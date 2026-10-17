@@ -25,5 +25,9 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@nestjs/typeorm": "^12.0.2",
+    "typeorm": "^1.1.2"
+  }
 }

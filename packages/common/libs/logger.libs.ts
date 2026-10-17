@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { WinstonModuleOptions } from "nest-winston";
 import * as winston from "winston";
+import { CorrelationContext } from "../messaging/correlation.context";
 
 export const loggerFormat = (appName: string): winston.Logform.Format =>
   winston.format.combine(
@@ -13,6 +14,10 @@ export const loggerFormat = (appName: string): winston.Logform.Format =>
       if (info?.context && typeof info?.context === "string") {
         context = chalk.cyan(`[${info?.context}]`.padEnd(20));
       }
+
+      // Gắn correlationId (nếu có trong ngữ cảnh async) để trace xuyên service
+      const cid = CorrelationContext.getId();
+      const cidOutput = cid ? chalk.gray(` {cid:${cid.slice(0, 8)}}`) : "";
 
       const error = info?.error as any;
       let errorOutput = "";
@@ -27,7 +32,7 @@ export const loggerFormat = (appName: string): winston.Logform.Format =>
         metaOutput = "";
       }
 
-      return `${colorizeAppName} - ${info.timestamp} ${context} ${info.level}: ${info.message} ${errorOutput} ${chalk.magentaBright(metaOutput)}`;
+      return `${colorizeAppName} - ${info.timestamp} ${context}${cidOutput} ${info.level}: ${info.message} ${errorOutput} ${chalk.magentaBright(metaOutput)}`;
     }),
   );
 

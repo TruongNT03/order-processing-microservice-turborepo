@@ -36,3 +36,8 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Docker runtime state (keep init scripts, ignore container volume data)
+.docker/kafka_data/
+.docker/rabbitmq_data/
+.docker/postgres_data/
