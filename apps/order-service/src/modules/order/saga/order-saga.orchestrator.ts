@@ -20,16 +20,6 @@ import {
   ReserveInventoryResult,
 } from './saga.types';
 
-/**
- * Orchestrator điều phối saga xử lý đơn hàng (chạy in-process trong
- * order-service). Gọi tuần tự product → inventory → payment qua RMQ
- * request-reply, lưu tiến trình vào saga_states, và chạy compensation
- * (release inventory, refund payment) khi một bước fail.
- *
- * Mọi handler downstream trả về { success, reason } thay vì throw khi lỗi
- * nghiệp vụ, nên ta vừa branch theo result.success vừa bọc try/catch cho
- * lỗi transport/hạ tầng.
- */
 @Injectable()
 export class OrderSagaOrchestrator {
   private readonly logger = new Logger(OrderSagaOrchestrator.name);
@@ -47,10 +37,6 @@ export class OrderSagaOrchestrator {
     private readonly rpcService: ResilientRpcService,
   ) {}
 
-  /**
-   * Chạy toàn bộ saga cho một order đã ở trạng thái PENDING.
-   * Trả về order sau cùng (CONFIRMED / CANCELLED / FAILED).
-   */
   async run(order: Order): Promise<Order> {
     const orderId = order.id;
     const saga = await this.startSaga(orderId);
@@ -341,10 +327,6 @@ export class OrderSagaOrchestrator {
     );
     this.logger.warn(`Order ${orderId} FAILED at ${step} (reason: ${reason})`);
   }
-
-  // =====================================================================
-  // Helpers
-  // =====================================================================
 
   private async startSaga(orderId: string): Promise<SagaState> {
     const existing = await this.sagaRepo.findOne({ where: { orderId } });

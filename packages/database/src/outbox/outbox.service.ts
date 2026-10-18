@@ -56,10 +56,6 @@ export class OutboxService {
     });
   }
 
-  /**
-   * Publish lỗi nhưng chưa vượt ngưỡng -> giữ PENDING để relay thử lại lần sau,
-   * chỉ cập nhật số lần thử + lỗi gần nhất.
-   */
   async markRetry(id: string, error: string, attempts: number): Promise<void> {
     await this.outboxRepo.update(id, {
       status: OutboxStatus.PENDING,

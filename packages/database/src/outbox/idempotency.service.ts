@@ -3,30 +3,20 @@ import { EntityManager, QueryFailedError, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ProcessedMessage } from "../entities/processed-message.entity";
 
-/**
- * Idempotency (Inbox) pattern.
- *
- * Dùng để đảm bảo một message chỉ gây hiệu ứng một lần dù broker giao trùng.
- */
 @Injectable()
 export class IdempotencyService {
   constructor(
     @InjectRepository(ProcessedMessage)
-    private readonly repo: Repository<ProcessedMessage>,
+    private readonly processedMessageRepo: Repository<ProcessedMessage>,
   ) {}
 
-  /** Đã xử lý message này bởi handler này chưa? */
   async isProcessed(messageId: string, handler: string): Promise<boolean> {
-    const found = await this.repo.findOne({
+    const found = await this.processedMessageRepo.findOne({
       where: { messageId, handler },
     });
     return !!found;
   }
 
-  /**
-   * Đánh dấu đã xử lý trong cùng transaction nghiệp vụ.
-   * Trả về false nếu đã tồn tại (duplicate) để caller bỏ qua.
-   */
   async markProcessed(
     manager: EntityManager,
     messageId: string,
@@ -41,7 +31,6 @@ export class IdempotencyService {
       });
       return true;
     } catch (err) {
-      // Vi phạm unique PK -> message trùng, đã xử lý trước đó
       if (err instanceof QueryFailedError) {
         return false;
       }
@@ -49,10 +38,6 @@ export class IdempotencyService {
     }
   }
 
-  /**
-   * Bọc một handler để chạy idempotent trong transaction:
-   * nếu message đã xử lý -> skip; nếu chưa -> chạy work() rồi đánh dấu, commit chung.
-   */
   async runOnce<T>(
     manager: EntityManager,
     messageId: string,

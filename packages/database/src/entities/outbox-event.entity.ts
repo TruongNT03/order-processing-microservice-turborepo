@@ -1,4 +1,9 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 export enum OutboxStatus {
   PENDING = "PENDING",
@@ -7,38 +12,37 @@ export enum OutboxStatus {
 }
 
 @Entity("outbox_events")
-@Index(["status", "createdAt"])
 export class OutboxEvent {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: "varchar", length: 100 })
+  @Column()
   aggregateType: string;
 
-  @Column({ type: "varchar", length: 100 })
+  @Column()
   aggregateId: string;
 
-  @Column({ type: "varchar", length: 150 })
+  @Column()
   eventType: string;
 
   @Column({ type: "jsonb" })
   payload: Record<string, any>;
 
-  @Column({ type: "varchar", length: 150, nullable: true })
+  @Column()
   partitionKey: string | null;
 
-  @Column({ type: "enum", enum: OutboxStatus, default: OutboxStatus.PENDING })
+  @Column()
   status: OutboxStatus;
 
-  @Column({ type: "int", default: 0 })
+  @Column()
   attempts: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column()
   lastError: string | null;
 
-  @Column({ type: "timestamptz", nullable: true })
+  @Column()
   publishedAt: Date | null;
 
-  @Column({ type: "timestamptz", default: () => "NOW()" })
+  @CreateDateColumn()
   createdAt: Date;
 }

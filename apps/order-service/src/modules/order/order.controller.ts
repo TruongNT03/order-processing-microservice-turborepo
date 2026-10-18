@@ -12,10 +12,6 @@ export class OrderController {
     private readonly saga: OrderSagaOrchestrator,
   ) {}
 
-  /**
-   * Tạo order (PENDING) rồi chạy saga điều phối ngay. Trả về order ở trạng
-   * thái cuối cùng (CONFIRMED / CANCELLED / FAILED) để caller thấy kết quả.
-   */
   @MessagePattern(RMQ_PATTERN.ORDER.CREATE)
   async create(@Payload() dto: CreateOrderDto) {
     const order = await this.orderService.create(dto);

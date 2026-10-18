@@ -10,20 +10,12 @@ import {
 import { OUTBOX_PUBLISHER } from "./outbox-publisher";
 
 export interface OutboxRelayModuleOptions {
-  /** Provider class implement OutboxPublisher (vd KafkaOutboxPublisher). */
   publisher: Type<any>;
-  /** Các module cần import để publisher resolve được dependency của nó. */
   imports?: any[];
-  /** Provider phụ mà publisher cần (vd ClientProxy đã register). */
   extraProviders?: Provider[];
   relayOptions?: OutboxRelayOptions;
 }
 
-/**
- * Module đóng gói Outbox relay. Service nào cần phát outbox event sẽ import
- * `OutboxRelayModule.forRoot({ publisher: KafkaOutboxPublisher, imports: [...] })`.
- * Publisher được bind vào token OUTBOX_PUBLISHER để relay sử dụng.
- */
 @Module({})
 export class OutboxRelayModule {
   static forRoot(options: OutboxRelayModuleOptions): DynamicModule {

@@ -1,37 +1,25 @@
 import {
   Inject,
   Injectable,
-  Logger,
   OnModuleDestroy,
   OnModuleInit,
   Optional,
 } from "@nestjs/common";
 import { OutboxService } from "./outbox.service";
 import { OUTBOX_PUBLISHER, OutboxPublisher } from "./outbox-publisher";
+import { WINSTON_MODULE_PROVIDER } from "nest-winston";
+import { Logger } from "winston";
 
 export const OUTBOX_RELAY_OPTIONS = "OUTBOX_RELAY_OPTIONS";
 
 export interface OutboxRelayOptions {
-  /** Chu kỳ quét outbox (ms). Mặc định 3000. */
   pollIntervalMs?: number;
-  /** Số event lấy mỗi lần quét. Mặc định 50. */
   batchSize?: number;
-  /** Số lần thử tối đa trước khi đánh dấu FAILED. Mặc định 5. */
   maxAttempts?: number;
 }
 
-/**
- * Transactional Outbox relay.
- *
- * Định kỳ quét các outbox_events ở trạng thái PENDING và publish ra broker
- * qua `OutboxPublisher`. Nhờ đó việc ghi DB (trong transaction nghiệp vụ) và
- * việc phát message được tách rời nhưng vẫn đảm bảo at-least-once: event chỉ
- * được publish sau khi transaction nghiệp vụ commit, và relay sẽ thử lại cho
- * tới khi thành công (hoặc vượt ngưỡng -> FAILED để xử lý thủ công).
- */
 @Injectable()
 export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(OutboxRelayService.name);
   private timer: NodeJS.Timeout | null = null;
   private running = false;
   private stopped = false;
@@ -48,10 +36,13 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     @Optional()
     @Inject(OUTBOX_RELAY_OPTIONS)
     options: OutboxRelayOptions | null,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
   ) {
     this.pollIntervalMs = options?.pollIntervalMs ?? 3000;
     this.batchSize = options?.batchSize ?? 50;
     this.maxAttempts = options?.maxAttempts ?? 5;
+    this.logger = this.logger.child({ context: OutboxService.name });
   }
 
   onModuleInit(): void {
@@ -62,7 +53,7 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
       return;
     }
     this.schedule();
-    this.logger.log(
+    this.logger.info(
       `Outbox relay started (interval=${this.pollIntervalMs}ms, batch=${this.batchSize}).`,
     );
   }
@@ -82,7 +73,6 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     }, this.pollIntervalMs);
   }
 
-  /** Quét + publish một batch. Public để có thể trigger thủ công khi test. */
   async tick(): Promise<void> {
     if (this.running || this.stopped || !this.publisher) return;
     this.running = true;

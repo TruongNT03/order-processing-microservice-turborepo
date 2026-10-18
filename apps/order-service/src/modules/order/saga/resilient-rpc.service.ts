@@ -4,11 +4,8 @@ import { firstValueFrom, timeout } from 'rxjs';
 import CircuitBreaker from 'opossum';
 
 export interface ResilientRpcOptions {
-  /** Timeout mỗi lần gọi (ms). */
   timeoutMs?: number;
-  /** Số lần thử lại khi lỗi (ngoài lần đầu). */
   retries?: number;
-  /** Chờ giữa các lần thử (ms), tăng tuyến tính theo số lần. */
   retryDelayMs?: number;
 }
 
@@ -16,7 +13,6 @@ const DEFAULTS = {
   timeoutMs: 10_000,
   retries: 2,
   retryDelayMs: 300,
-  // Ngưỡng circuit breaker
   errorThresholdPercentage: 50,
   resetTimeout: 15_000,
   volumeThreshold: 5,

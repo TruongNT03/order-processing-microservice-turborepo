@@ -1,6 +1,8 @@
 import { QueryRunner } from "typeorm";
 
-export async function createOutboxInfra(queryRunner: any): Promise<void> {
+export async function createOutboxInfra(
+  queryRunner: QueryRunner,
+): Promise<void> {
   await queryRunner.query(`
     CREATE TABLE IF NOT EXISTS outbox_events (
       id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
