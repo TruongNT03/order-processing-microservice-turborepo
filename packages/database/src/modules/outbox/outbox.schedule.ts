@@ -6,11 +6,11 @@ import {
   OUTBOX_MAX_ATTEMPTS,
   OUTBOX_PUBLISHER,
 } from "./outbox.constant";
-import { DataSource, LessThan, QueryRunner } from "typeorm";
+import { DataSource, LessThan } from "typeorm";
 import { OutboxPublisher } from "./outbox.type";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { Logger } from "winston";
-import { OutboxEvent, OutboxStatus } from "../entities";
+import { OutboxEvent, OutboxStatus } from "../../entities";
 
 @Injectable()
 export class OutboxScheduleService {

@@ -8,7 +8,7 @@ import {
   OUTBOX_PUBLISHER,
 } from "./outbox.constant";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { OutboxEvent } from "../entities";
+import { OutboxEvent } from "../../entities";
 
 @Module({})
 export class OutboxModule {

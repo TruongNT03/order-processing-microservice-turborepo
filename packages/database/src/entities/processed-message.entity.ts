@@ -7,9 +7,6 @@ export class ProcessedMessage {
   @PrimaryColumn()
   messageId: string;
 
-  @PrimaryColumn()
-  handler: string;
-
   @Column()
   messageType: string | null;
 

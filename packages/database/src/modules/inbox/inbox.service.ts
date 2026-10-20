@@ -1,18 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { EntityManager, QueryFailedError, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ProcessedMessage } from "../entities/processed-message.entity";
+import { ProcessedMessage } from "../../entities/processed-message.entity";
 
 @Injectable()
-export class IdempotencyService {
+export class InboxService {
   constructor(
     @InjectRepository(ProcessedMessage)
     private readonly processedMessageRepo: Repository<ProcessedMessage>,
   ) {}
 
-  async isProcessed(messageId: string, handler: string): Promise<boolean> {
+  async isProcessed(messageId: string): Promise<boolean> {
     const found = await this.processedMessageRepo.findOne({
-      where: { messageId, handler },
+      where: { messageId },
     });
     return !!found;
   }
@@ -20,14 +20,13 @@ export class IdempotencyService {
   async markProcessed(
     manager: EntityManager,
     messageId: string,
-    handler: string,
     messageType?: string,
   ): Promise<boolean> {
     try {
-      await manager.insert(ProcessedMessage, {
+      await manager.save(ProcessedMessage, {
         messageId,
-        handler,
         messageType: messageType ?? null,
+        processedAt: new Date(),
       });
       return true;
     } catch (err) {
@@ -41,16 +40,10 @@ export class IdempotencyService {
   async runOnce<T>(
     manager: EntityManager,
     messageId: string,
-    handler: string,
     work: (manager: EntityManager) => Promise<T>,
     messageType?: string,
   ): Promise<T | undefined> {
-    const first = await this.markProcessed(
-      manager,
-      messageId,
-      handler,
-      messageType,
-    );
+    const first = await this.markProcessed(manager, messageId, messageType);
     if (!first) {
       return undefined;
     }

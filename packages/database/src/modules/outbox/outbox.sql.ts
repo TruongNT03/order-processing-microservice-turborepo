@@ -18,19 +18,8 @@ export async function createOutboxInfra(
       created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
-
-  await queryRunner.query(`
-    CREATE TABLE IF NOT EXISTS processed_messages (
-      message_id   VARCHAR(150) NOT NULL,
-      handler      VARCHAR(150) NOT NULL,
-      message_type VARCHAR(150),
-      processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      PRIMARY KEY (message_id, handler)
-    )
-  `);
 }
 
 export async function dropOutboxInfra(queryRunner: QueryRunner): Promise<void> {
-  await queryRunner.query(`DROP TABLE IF EXISTS processed_messages`);
   await queryRunner.query(`DROP TABLE IF EXISTS outbox_events`);
 }

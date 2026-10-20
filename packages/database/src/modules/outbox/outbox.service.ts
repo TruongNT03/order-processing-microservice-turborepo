@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EntityManager, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { OutboxEvent, OutboxStatus } from "../entities/outbox-event.entity";
+import { OutboxEvent, OutboxStatus } from "../../entities/outbox-event.entity";
 
 export interface SaveOutboxParams {
   aggregateType: string;
