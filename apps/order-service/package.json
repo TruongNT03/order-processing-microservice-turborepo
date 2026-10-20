@@ -28,6 +28,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/microservices": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^12.0.2",
     "@nestjs/typeorm": "^12.0.2",
     "@repo/common": "*",
     "@repo/database": "*",

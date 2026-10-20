@@ -5,12 +5,15 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfiguration } from '../config';
 import { getLoggerTransport } from '@repo/common';
+import { KafkaOutboxModule } from './kafka-outbox/kafka-outbox.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     WinstonModule.forRootAsync({
       useFactory: () => getLoggerTransport('Order Service', false),
     }),
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, load: [databaseConfiguration] }),
     TypeOrmModule.forRootAsync({
       inject: [databaseConfiguration.KEY],
@@ -21,6 +24,7 @@ import { getLoggerTransport } from '@repo/common';
       }),
     }),
     OrderModule,
+    KafkaOutboxModule,
   ],
 })
 export class AppModule {}

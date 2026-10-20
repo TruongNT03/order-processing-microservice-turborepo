@@ -12,6 +12,7 @@
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.0",
+    "@nestjs/schedule": "^12.0.2",
     "@nestjs/typeorm": "^12.0.2",
     "nest-winston": "^2.0.0",
     "pg": "^8.13.1",
