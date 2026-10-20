@@ -9,7 +9,6 @@ import {
 } from "./outbox.constant";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { OutboxEvent } from "../entities";
-import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({})
 export class OutboxModule {
@@ -19,7 +18,6 @@ export class OutboxModule {
       imports: [
         ...(options?.imports ?? []),
         TypeOrmModule.forFeature([OutboxEvent]),
-        ScheduleModule.forRoot(),
       ],
       providers: [
         {
