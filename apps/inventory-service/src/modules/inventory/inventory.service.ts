@@ -13,6 +13,7 @@ import {
   ReserveInventoryRequest,
   ReserveInventoryResult,
 } from './dto/reserve-inventory.dto';
+import { RedisService } from '@repo/core';
 
 @Injectable()
 export class InventoryService {
@@ -24,6 +25,7 @@ export class InventoryService {
     @InjectRepository(Reservation)
     private readonly reservationRepo: Repository<Reservation>,
     private readonly dataSource: DataSource,
+    private readonly redisService: RedisService,
   ) {}
 
   async findOne(productId: string): Promise<Inventory> {
@@ -38,6 +40,8 @@ export class InventoryService {
 
   async reserve(req: ReserveInventoryRequest): Promise<ReserveInventoryResult> {
     const { orderId, items } = req;
+
+    this.redisService.deleteByKey('abc');
 
     return;
     // return this.dataSource.transaction(async (manager) => {

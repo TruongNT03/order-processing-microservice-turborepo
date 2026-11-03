@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { IdempotencyService } from '@repo/database';
 import {
   Notification,
   NotificationChannel,
@@ -23,7 +22,6 @@ export class NotificationService {
     @InjectRepository(Notification)
     private readonly notificationRepo: Repository<Notification>,
     private readonly dataSource: DataSource,
-    private readonly idempotency: IdempotencyService,
   ) {}
 
   /**
@@ -54,32 +52,31 @@ export class NotificationService {
     handler: string,
     input: RecordNotificationInput,
   ): Promise<void> {
-    const result = await this.dataSource.transaction(async (manager) =>
-      this.idempotency.runOnce(
-        manager as any,
-        messageId,
-        handler,
-        async (m) => {
-          const notification = m.create(Notification, {
-            orderId: input.orderId ?? null,
-            eventType: input.eventType,
-            message: input.message,
-            payload: input.payload ?? null,
-            channel: input.channel ?? NotificationChannel.LOG,
-          });
-          return m.save(notification);
-        },
-        input.eventType,
-      ),
-    );
-
-    if (result === undefined) {
-      this.logger.debug(`Skip duplicate message ${messageId} (${handler}).`);
-      return;
-    }
-    this.logger.log(
-      `[NOTIFY] (${input.eventType}) order=${input.orderId ?? '-'}: ${input.message}`,
-    );
+    // const result = await this.dataSource.transaction(async (manager) =>
+    //   this.idempotency.runOnce(
+    //     manager as any,
+    //     messageId,
+    //     handler,
+    //     async (m) => {
+    //       const notification = m.create(Notification, {
+    //         orderId: input.orderId ?? null,
+    //         eventType: input.eventType,
+    //         message: input.message,
+    //         payload: input.payload ?? null,
+    //         channel: input.channel ?? NotificationChannel.LOG,
+    //       });
+    //       return m.save(notification);
+    //     },
+    //     input.eventType,
+    //   ),
+    // );
+    // if (result === undefined) {
+    //   this.logger.debug(`Skip duplicate message ${messageId} (${handler}).`);
+    //   return;
+    // }
+    // this.logger.log(
+    //   `[NOTIFY] (${input.eventType}) order=${input.orderId ?? '-'}: ${input.message}`,
+    // );
   }
 
   async findAll(): Promise<Notification[]> {

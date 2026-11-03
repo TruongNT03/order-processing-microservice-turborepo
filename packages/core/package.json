@@ -1,0 +1,23 @@
+{
+  "name": "@repo/core",
+  "version": "0.0.1",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start:dev": "tsc --watch",
+    "build": "tsc",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.0",
+    "ioredis": "^6.0.0",
+    "nest-winston": "^2.0.0",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7"
+  }
+}

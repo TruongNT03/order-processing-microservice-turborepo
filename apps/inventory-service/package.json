@@ -31,6 +31,7 @@
     "@nestjs/typeorm": "^12.0.2",
     "@repo/common": "*",
     "@repo/database": "*",
+    "@repo/core": "*",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.4",
     "kafkajs": "^2.2.4",
