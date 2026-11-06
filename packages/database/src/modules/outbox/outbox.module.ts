@@ -7,33 +7,29 @@ import {
   OUTBOX_MODULE_OPTIONS,
   OUTBOX_PUBLISHER,
 } from "./outbox.constant";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { OutboxEvent } from "../../entities";
 
 @Module({})
 export class OutboxModule {
   static registerAsync(options: OutboxModuleAsyncOptions): DynamicModule {
     return {
       module: OutboxModule,
-      imports: [
-        ...(options?.imports ?? []),
-        TypeOrmModule.forFeature([OutboxEvent]),
-      ],
+      imports: [...(options?.imports ?? [])],
       providers: [
         {
-          provide: OUTBOX_MODULE_OPTIONS,
-          useFactory: options.useFactory,
-          inject: options.inject ?? [],
-        },
-        {
           provide: OUTBOX_DATA_SOURCE,
-          useFactory: (options: OutboxModuleOptions) => options.dataSource,
-          inject: [OUTBOX_MODULE_OPTIONS],
+          inject: options.inject ?? [],
+          useFactory: async (...args: any[]) => {
+            const moduleOptions = await options.useFactory(...args);
+            return moduleOptions.dataSource;
+          },
         },
         {
           provide: OUTBOX_PUBLISHER,
-          useFactory: (options: OutboxModuleOptions) => options.publisher,
-          inject: [OUTBOX_MODULE_OPTIONS],
+          inject: options.inject ?? [],
+          useFactory: async (...args: any[]) => {
+            const moduleOptions = await options.useFactory(...args);
+            return moduleOptions.publisher;
+          },
         },
         OutboxService,
         OutboxScheduleService,

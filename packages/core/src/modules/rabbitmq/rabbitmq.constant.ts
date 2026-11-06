@@ -1,0 +1,2 @@
+export const RABBITMQ_CONFIG = "RABBITMQ_CONFIG";
+export const RABBITMQ_QUEUE = "RABBITMQ_QUEUE";

@@ -4,9 +4,21 @@ import { WinstonModule } from 'nest-winston';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfiguration } from '../config';
-import { getLoggerTransport } from '@repo/common';
+import {
+  AppConfigModule,
+  getLoggerTransport,
+  IRabbitMqQueue,
+  rabbitmqConfiguration,
+  RMQ_QUEUE,
+  RmqManualAckInterceptor,
+} from '@repo/common';
 import { KafkaOutboxModule } from './kafka-outbox/kafka-outbox.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { OutboxModule } from '@repo/database';
+import { DataSource } from 'typeorm';
+import { KafkaOutboxPublisher } from './kafka-outbox/kafka-outbox.publisher';
+import { RabbitMqModule } from '@repo/core';
 
 @Module({
   imports: [
@@ -14,7 +26,9 @@ import { ScheduleModule } from '@nestjs/schedule';
       useFactory: () => getLoggerTransport('Order Service', false),
     }),
     ScheduleModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true, load: [databaseConfiguration] }),
+    AppConfigModule.forRoot({
+      load: [databaseConfiguration, rabbitmqConfiguration],
+    }),
     TypeOrmModule.forRootAsync({
       inject: [databaseConfiguration.KEY],
       useFactory: (
@@ -23,8 +37,29 @@ import { ScheduleModule } from '@nestjs/schedule';
         ...databaseConfig,
       }),
     }),
+    RabbitMqModule.forRootAsync({
+      inject: [rabbitmqConfiguration.KEY],
+      useFactory: (
+        rabbitmqConfig: ConfigType<typeof rabbitmqConfiguration>,
+      ) => ({
+        rabbitmqConfig,
+        rabbitmqQueue: RMQ_QUEUE.ORDER,
+      }),
+    }),
+    OutboxModule.registerAsync({
+      imports: [KafkaOutboxModule],
+      inject: [DataSource, KafkaOutboxPublisher],
+      useFactory: (
+        dataSource: DataSource,
+        publisher: KafkaOutboxPublisher,
+      ) => ({
+        dataSource,
+        publisher,
+      }),
+    }),
     OrderModule,
     KafkaOutboxModule,
   ],
+  providers: [],
 })
 export class AppModule {}

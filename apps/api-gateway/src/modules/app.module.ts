@@ -1,13 +1,19 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionFilter } from '@repo/common';
+import { AllExceptionFilter, AppConfigModule } from '@repo/common';
 import { WinstonModule } from 'nest-winston';
 import { OrderModule } from './order/order.module';
 import { ProductModule } from './product/product.module';
 
 @Module({
-  imports: [AuthModule, WinstonModule.forRoot({}), OrderModule, ProductModule],
+  imports: [
+    AppConfigModule.forRoot(),
+    AuthModule,
+    WinstonModule.forRoot({}),
+    OrderModule,
+    ProductModule,
+  ],
   controllers: [],
   providers: [
     {

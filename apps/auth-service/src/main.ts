@@ -15,7 +15,7 @@ async function bootstrap() {
     AppModule,
     {
       logger,
-      ...buildRmqOptions({ queue: RMQ_QUEUE.AUTH }),
+      ...buildRmqOptions({ queue: RMQ_QUEUE.AUTH.MAIN.QUEUE }),
     },
   );
 
@@ -23,6 +23,6 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen();
-  logger.log(`Auth Service is listening on queue ${RMQ_QUEUE.AUTH}`);
+  logger.log(`Auth Service is listening on queue ${RMQ_QUEUE.AUTH.MAIN.QUEUE}`);
 }
 bootstrap();

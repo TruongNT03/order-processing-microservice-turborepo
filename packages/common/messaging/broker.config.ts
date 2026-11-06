@@ -1,11 +1,5 @@
 import { RmqOptions, KafkaOptions, Transport } from "@nestjs/microservices";
 
-/**
- * Dựng option kết nối broker từ env, dùng chung cho cả client (gateway/producer)
- * lẫn server (microservice listener). Nhờ đó không hardcode localhost,
- * chạy được cả ở local lẫn trong Docker (host = rabbitmq / kafka).
- */
-
 export const getRmqUrl = (env: NodeJS.ProcessEnv = process.env): string => {
   if (env.RABBITMQ_URL) return env.RABBITMQ_URL;
   const user = env.RABBITMQ_USER ?? "admin";
@@ -17,20 +11,13 @@ export const getRmqUrl = (env: NodeJS.ProcessEnv = process.env): string => {
 
 export interface RmqFactoryOptions {
   queue: string;
-  /** Bật khi muốn quản lý ack thủ công (dùng cho retry/DLQ) */
   noAck?: boolean;
-  /** Cấu hình dead-letter cho queue */
-  deadLetterExchange?: string;
   prefetchCount?: number;
   env?: NodeJS.ProcessEnv;
 }
 
 export const buildRmqOptions = (opts: RmqFactoryOptions): RmqOptions => {
   const env = opts.env ?? process.env;
-  const queueArguments: Record<string, any> = {};
-  if (opts.deadLetterExchange) {
-    queueArguments["x-dead-letter-exchange"] = opts.deadLetterExchange;
-  }
 
   return {
     transport: Transport.RMQ,
@@ -39,12 +26,7 @@ export const buildRmqOptions = (opts: RmqFactoryOptions): RmqOptions => {
       queue: opts.queue,
       noAck: opts.noAck ?? false,
       prefetchCount: opts.prefetchCount ?? 10,
-      queueOptions: {
-        durable: true,
-        ...(Object.keys(queueArguments).length
-          ? { arguments: queueArguments }
-          : {}),
-      },
+      noAssert: true,
     },
   };
 };

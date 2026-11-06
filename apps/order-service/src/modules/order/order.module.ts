@@ -13,6 +13,7 @@ import { OutboxModule } from '@repo/database';
 import { KafkaOutboxModule } from '../kafka-outbox/kafka-outbox.module';
 import { DataSource } from 'typeorm';
 import { KafkaOutboxPublisher } from '../kafka-outbox/kafka-outbox.publisher';
+import { RpcOrderController } from './rpc-order.controller';
 
 @Module({
   imports: [
@@ -20,15 +21,18 @@ import { KafkaOutboxPublisher } from '../kafka-outbox/kafka-outbox.publisher';
     ClientsModule.registerAsync([
       {
         name: RMQ_CLIENT.PRODUCT,
-        useFactory: () => buildRmqOptions({ queue: RMQ_QUEUE.PRODUCT }),
+        useFactory: () =>
+          buildRmqOptions({ queue: RMQ_QUEUE.PRODUCT.MAIN.QUEUE }),
       },
       {
         name: RMQ_CLIENT.INVENTORY,
-        useFactory: () => buildRmqOptions({ queue: RMQ_QUEUE.INVENTORY }),
+        useFactory: () =>
+          buildRmqOptions({ queue: RMQ_QUEUE.INVENTORY.MAIN.QUEUE }),
       },
       {
         name: RMQ_CLIENT.PAYMENT,
-        useFactory: () => buildRmqOptions({ queue: RMQ_QUEUE.PAYMENT }),
+        useFactory: () =>
+          buildRmqOptions({ queue: RMQ_QUEUE.PAYMENT.MAIN.QUEUE }),
       },
     ]),
     OutboxModule.registerAsync({
@@ -43,7 +47,7 @@ import { KafkaOutboxPublisher } from '../kafka-outbox/kafka-outbox.publisher';
       }),
     }),
   ],
-  controllers: [OrderController],
+  controllers: [OrderController, RpcOrderController],
   providers: [OrderService, OrderSagaOrchestrator, ResilientRpcService],
 })
 export class OrderModule {}

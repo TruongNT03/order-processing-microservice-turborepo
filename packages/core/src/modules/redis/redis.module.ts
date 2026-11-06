@@ -8,7 +8,7 @@ import { ConfigModule, ConfigType } from "@nestjs/config";
 @Global()
 @Module({
   imports: [
-    AppConfigModule.forRoot(),
+    AppConfigModule.forRoot({ load: [redisConfiguration] }),
     ConfigModule.forFeature(redisConfiguration),
   ],
   providers: [

@@ -32,7 +32,7 @@ export class OrderSagaOrchestrator {
     private readonly sagaRepo: Repository<SagaState>,
     private readonly orderService: OrderService,
     @InjectDataSource()
-    private readonly dataSource: DataSource,
+    // private readonly dataSource: DataSource,
     private readonly outboxService: OutboxService,
     private readonly rpcService: ResilientRpcService,
   ) {}
@@ -141,8 +141,6 @@ export class OrderSagaOrchestrator {
         req,
       );
     } catch (err) {
-      // Lỗi transport: không chắc đã giữ hàng hay chưa. release là idempotent
-      // nên gọi bù trừ cho an toàn, rồi hủy order.
       await this.markStep(
         saga,
         SagaStep.RESERVE_INVENTORY,
@@ -158,18 +156,18 @@ export class OrderSagaOrchestrator {
       return false;
     }
 
-    if (!result.success) {
-      // Lỗi nghiệp vụ (hết hàng): chưa giữ được gì → không cần bù trừ, chỉ hủy.
-      const reason = this.describeShortage(result);
-      await this.markStep(
-        saga,
-        SagaStep.RESERVE_INVENTORY,
-        StepStatus.FAILED,
-        reason,
-      );
-      await this.cancelOrder(saga, order.id, reason);
-      return false;
-    }
+    // if (!result.success) {
+    //   // Lỗi nghiệp vụ (hết hàng): chưa giữ được gì → không cần bù trừ, chỉ hủy.
+    //   const reason = this.describeShortage(result);
+    //   await this.markStep(
+    //     saga,
+    //     SagaStep.RESERVE_INVENTORY,
+    //     StepStatus.FAILED,
+    //     reason,
+    //   );
+    //   await this.cancelOrder(saga, order.id, reason);
+    //   return false;
+    // }
 
     await this.markStep(saga, SagaStep.RESERVE_INVENTORY, StepStatus.SUCCESS);
     return true;
@@ -394,33 +392,32 @@ export class OrderSagaOrchestrator {
     eventType: string,
     eventData: { orderId: string; reason?: string },
   ): Promise<void> {
-    await this.dataSource.transaction(async (manager) => {
-      await manager.update(
-        Order,
-        { id: orderId },
-        {
-          status: orderStatus,
-          ...(failureReason !== null ? { failureReason } : {}),
-        },
-      );
-      await manager.save(SagaState, saga);
-      await this.outboxService.saveInTransaction(manager as any, {
-        aggregateType: 'order',
-        aggregateId: orderId,
-        eventType,
-        payload: eventData,
-        partitionKey: orderId,
-      });
-    });
-  }
-
-  private describeShortage(result: ReserveInventoryResult): string {
-    const base = result.reason ?? 'INSUFFICIENT_STOCK';
-    if (!result.shortages?.length) return base;
-    const detail = result.shortages
-      .map((s) => `${s.productId}(req ${s.requested}/avail ${s.available})`)
-      .join(', ');
-    return `${base}: ${detail}`;
+    //   await this.dataSource.transaction(async (manager) => {
+    //     await manager.update(
+    //       Order,
+    //       { id: orderId },
+    //       {
+    //         status: orderStatus,
+    //         ...(failureReason !== null ? { failureReason } : {}),
+    //       },
+    //     );
+    //     await manager.save(SagaState, saga);
+    //     await this.outboxService.saveInTransaction(manager as any, {
+    //       aggregateType: 'order',
+    //       aggregateId: orderId,
+    //       eventType,
+    //       payload: eventData,
+    //       partitionKey: orderId,
+    //     });
+    //   });
+    // }
+    // private describeShortage(result: ReserveInventoryResult): string {
+    //   const base = result.reason ?? 'INSUFFICIENT_STOCK';
+    //   if (!result.shortages?.length) return base;
+    //   const detail = result.shortages
+    //     .map((s) => `${s.productId}(req ${s.requested}/avail ${s.available})`)
+    //     .join(', ');
+    //   return `${base}: ${detail}`;
   }
 
   private errMsg(err: unknown): string {

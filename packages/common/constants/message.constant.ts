@@ -1,11 +1,23 @@
-export const RMQ_QUEUE = {
-  PRODUCT: "product_queue",
-  ORDER: "order_queue",
-  INVENTORY: "inventory_queue",
-  PAYMENT: "payment_queue",
-  NOTIFICATION: "notification_queue",
-  AUTH: "auth_queue",
-} as const;
+import { createRmqQueue } from "../libs";
+import { IRabbitMqQueue } from "../types";
+
+export enum RMQ_QUEUE_KEY {
+  PRODUCT = "PRODUCT",
+  ORDER = "ORDER",
+  INVENTORY = "INVENTORY",
+  PAYMENT = "PAYMENT",
+  NOTIFICATION = "NOTIFICATION",
+  AUTH = "AUTH",
+}
+
+export const RMQ_QUEUE: Record<RMQ_QUEUE_KEY, IRabbitMqQueue> = {
+  PRODUCT: createRmqQueue("product"),
+  ORDER: createRmqQueue("order"),
+  INVENTORY: createRmqQueue("inventory"),
+  PAYMENT: createRmqQueue("payment"),
+  NOTIFICATION: createRmqQueue("notification"),
+  AUTH: createRmqQueue("auth"),
+} as const satisfies Record<RMQ_QUEUE_KEY, IRabbitMqQueue>;
 
 export const RMQ_CLIENT = {
   PRODUCT: "PRODUCT_SERVICE",
