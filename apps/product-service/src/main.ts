@@ -15,7 +15,7 @@ async function bootstrap() {
     AppModule,
     {
       logger,
-      ...buildRmqOptions({ queue: RMQ_QUEUE.PRODUCT }),
+      ...buildRmqOptions({ queue: RMQ_QUEUE.PRODUCT.MAIN.QUEUE }),
     },
   );
 
@@ -23,6 +23,8 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen();
-  logger.log(`Product Service is listening on queue ${RMQ_QUEUE.PRODUCT}`);
+  logger.log(
+    `Product Service is listening on queue ${RMQ_QUEUE.PRODUCT.MAIN.QUEUE}`,
+  );
 }
 bootstrap();

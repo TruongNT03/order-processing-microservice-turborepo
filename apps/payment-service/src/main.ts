@@ -15,7 +15,7 @@ async function bootstrap() {
     AppModule,
     {
       logger,
-      ...buildRmqOptions({ queue: RMQ_QUEUE.PAYMENT }),
+      ...buildRmqOptions({ queue: RMQ_QUEUE.PAYMENT.MAIN.QUEUE }),
     },
   );
 
@@ -23,6 +23,8 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen();
-  logger.log(`Payment Service is listening on queue ${RMQ_QUEUE.PAYMENT}`);
+  logger.log(
+    `Payment Service is listening on queue ${RMQ_QUEUE.PAYMENT.MAIN.QUEUE}`,
+  );
 }
 bootstrap();

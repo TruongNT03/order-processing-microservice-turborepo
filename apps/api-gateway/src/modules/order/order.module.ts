@@ -9,7 +9,8 @@ import { OrderController } from './order.controller';
     ClientsModule.registerAsync([
       {
         name: RMQ_CLIENT.ORDER,
-        useFactory: () => buildRmqOptions({ queue: RMQ_QUEUE.ORDER }),
+        useFactory: () =>
+          buildRmqOptions({ queue: RMQ_QUEUE.ORDER.MAIN.QUEUE, noAck: true }),
       },
     ]),
   ],

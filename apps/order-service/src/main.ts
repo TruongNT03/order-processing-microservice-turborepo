@@ -15,17 +15,17 @@ async function bootstrap() {
     AppModule,
     {
       logger,
-      ...buildRmqOptions({ queue: RMQ_QUEUE.ORDER }),
+      ...buildRmqOptions({ queue: RMQ_QUEUE.ORDER.MAIN.QUEUE }),
     },
   );
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-  // Graceful shutdown: đóng kết nối broker/DB + dừng outbox relay gọn gàng
-  // khi nhận SIGTERM/SIGINT (OnModuleDestroy sẽ được gọi).
   app.enableShutdownHooks();
 
   await app.listen();
-  logger.log(`Order Service is listening on queue ${RMQ_QUEUE.ORDER}`);
+  logger.log(
+    `Order Service is listening on queue ${RMQ_QUEUE.ORDER.MAIN.QUEUE}`,
+  );
 }
 bootstrap();

@@ -4,10 +4,6 @@ import { Order } from './order.entity';
 
 export const TableName = 'order_items';
 
-/**
- * Một dòng sản phẩm trong order. Lưu snapshot giá tại thời điểm đặt
- * (unitPrice) để không phụ thuộc giá product-service thay đổi về sau.
- */
 @Entity(TableName)
 export class OrderItem extends BaseEntity {
   @Index()

@@ -15,7 +15,7 @@ async function bootstrap() {
     AppModule,
     {
       logger,
-      ...buildRmqOptions({ queue: RMQ_QUEUE.INVENTORY }),
+      ...buildRmqOptions({ queue: RMQ_QUEUE.INVENTORY.MAIN.QUEUE }),
     },
   );
 
@@ -23,6 +23,8 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen();
-  logger.log(`Inventory Service is listening on queue ${RMQ_QUEUE.INVENTORY}`);
+  logger.log(
+    `Inventory Service is listening on queue ${RMQ_QUEUE.INVENTORY.MAIN.QUEUE}`,
+  );
 }
 bootstrap();
